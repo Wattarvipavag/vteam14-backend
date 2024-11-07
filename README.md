@@ -20,11 +20,15 @@ npm install
 
 ---
 
-#### **Run the application in a docker container**
+## **Docker environment**
+
+#### **Run the application**
 
 ```bash
 docker compose up -d
 ```
+
+#### **Stop the application**
 
 ```bash
 docker compose down
@@ -32,7 +36,9 @@ docker compose down
 
 ---
 
-#### **Run the application locally**
+## **Local environment**
+
+#### **Run the application**
 
 ```bash
 npm run dev
