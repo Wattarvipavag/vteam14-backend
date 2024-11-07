@@ -3,7 +3,7 @@
 ### **Clone the repository**
 
 ```bash
-git clone https://github.com/jkberiksson/vteam14-backend.git
+git clone git@github.com:jkberiksson/vteam14-backend.git
 ```
 
 ```bash
