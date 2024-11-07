@@ -6,7 +6,9 @@
     "type": "module",
     "scripts": {
         "start": "node index.js",
-        "dev": "nodemon index.js"
+        "dev": "nodemon index.js",
+        "eslint": "npx eslint '**/*.js'",
+        "eslint:fix": "npx eslint '**/*.js' --fix"
     },
     "author": "",
     "license": "ISC",
@@ -14,6 +16,9 @@
         "express": "^4.21.1"
     },
     "devDependencies": {
+        "@eslint/js": "^9.14.0",
+        "eslint": "^9.14.0",
+        "globals": "^15.12.0",
         "nodemon": "^3.1.7"
     }
 }
