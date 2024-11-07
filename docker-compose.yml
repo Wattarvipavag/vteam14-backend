@@ -1,0 +1,8 @@
+services:
+    server:
+        build: .
+        container_name: 'vteam14-backend'
+        ports:
+            - '8000:8000'
+        volumes:
+            - '.:/server'
