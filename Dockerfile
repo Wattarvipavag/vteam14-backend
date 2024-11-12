@@ -4,9 +4,9 @@ WORKDIR /server
 
 COPY package*.json .
 
-COPY index.js .
-
 RUN npm install
+
+COPY index.js .
 
 EXPOSE 8000
 
