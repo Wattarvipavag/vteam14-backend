@@ -5,7 +5,7 @@ import pluginJs from '@eslint/js';
 export default [
     {
         languageOptions: {
-            globals: globals.browser,
+            globals: globals.node,
             parserOptions: {
                 sourceType: 'module', // Enable ES6 modules if using import/export
             },
