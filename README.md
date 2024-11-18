@@ -1,4 +1,5 @@
 # Backend repo for vteam14
+
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/jkberiksson/vteam14-backend/badges/quality-score.png?b=main)](https://scrutinizer-ci.com/g/jkberiksson/vteam14-backend/?branch=main)
 [![Build Status](https://scrutinizer-ci.com/g/jkberiksson/vteam14-backend/badges/build.png?b=main)](https://scrutinizer-ci.com/g/jkberiksson/vteam14-backend/build-status/main)
 
@@ -41,6 +42,14 @@ docker compose up
 ```bash
 docker compose down
 ```
+
+#### **If in trouble, try rebuilding with**
+
+```
+docker compose build --no-cache
+```
+
+Then try running docker compose up, again.
 
 ---
 
