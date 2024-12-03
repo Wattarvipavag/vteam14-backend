@@ -8,7 +8,9 @@
         "start": "node index.js",
         "dev": "nodemon index.js",
         "eslint": "npx eslint '**/*.js'",
-        "eslint:fix": "npx eslint '**/*.js' --fix"
+        "eslint:fix": "npx eslint '**/*.js' --fix",
+        "test": "NODE_ENV=test",
+        "posttest": "npm run eslint"
     },
     "author": "",
     "license": "ISC",
