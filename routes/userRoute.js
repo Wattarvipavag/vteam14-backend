@@ -9,6 +9,6 @@ const router = Router();
 
 router.get('/', getAllUsers);
 router.get('/:id', getUser);
-router.get('/oath/:id', getUserOauth);
+router.get('/oauth/:id', getUserOauth);
 
 export default router;
