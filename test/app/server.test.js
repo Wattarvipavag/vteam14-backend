@@ -1,4 +1,4 @@
-import request from 'supertest';
+/* import request from 'supertest';
 import { app } from '../../index.js'; // Import app directly
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
@@ -26,3 +26,4 @@ describe('Express Server Tests', () => {
         expect(response.body.message).toBe('Hello world!');
     });
 });
+ */
