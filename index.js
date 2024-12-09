@@ -4,6 +4,7 @@ import 'dotenv/config';
 import { connectToDb } from './db/db.js';
 import authRoutes from './routes/authRoute.js';
 import userRoutes from './routes/userRoute.js';
+import cityRoutes from './routes/cityRoute.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000; // Default port is 8000 if not defined
@@ -14,12 +15,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/', (req, res) => {
-    res.json({ message: 'Hello world!' });
-});
-
 app.use('/api', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/cities', cityRoutes);
 
 // Export app for testing
 export { app };
