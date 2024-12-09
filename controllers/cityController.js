@@ -82,3 +82,13 @@ export async function deleteCityByName(req, res) {
         res.status(500).json({ message: `deleteCityByName ${e.message}` });
     }
 }
+
+export async function deleteAllCities(req, res) {
+    try {
+        await City.deleteMany();
+
+        return res.status(200).json({ message: 'Cities deleted' });
+    } catch (e) {
+        res.status(500).json({ message: `deleteCityByName ${e.message}` });
+    }
+}

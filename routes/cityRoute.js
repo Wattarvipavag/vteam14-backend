@@ -7,6 +7,7 @@ import {
     updateCity,
     deleteCityByName,
     deleteCityById,
+    deleteAllCities,
 } from '../controllers/cityController.js';
 
 const router = Router();
@@ -18,5 +19,6 @@ router.post('/', createCity);
 router.put('/:id', updateCity);
 router.delete('/cityId/:id', deleteCityById);
 router.delete('/cityName/:name', deleteCityByName);
+router.delete('/', deleteAllCities);
 
 export default router;
