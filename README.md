@@ -68,5 +68,5 @@ npm run dev
 #### **Run Tests with Jest**
 
 ```bash
-npm test
+npm run test
 ```
