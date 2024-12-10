@@ -18,10 +18,8 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-    await City.create([
-        { name: 'Stockholm'},
-        { name: 'Karlskrona'},
-    ]);
+    await City.create({ name: 'Stockholm' });
+    await City.create({ name: 'Karlskrona' });
 });
 
 afterEach(async () => {
@@ -71,11 +69,9 @@ describe('City Controller Tests', () => {
 
     describe('POST /api/cities', () => {
         it('should create a new city', async () => {
-            const response = await request(app)
-                .post('/api/cities')
-                .send({
-                    name: 'Kristianstad'
-                });
+            const response = await request(app).post('/api/cities').send({
+                name: 'Kristianstad',
+            });
             expect(response.status).toBe(201);
             expect(response.body.message).toBe('City created');
             expect(response.body.city).toHaveProperty('name', 'Kristianstad');
