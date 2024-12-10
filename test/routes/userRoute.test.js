@@ -18,10 +18,8 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-    await User.create([
-        { name: 'Arja Hallonen', email: 'arja@hallonen.com', oauthId: '1234' },
-        { name: 'Chris P Bacon', email: 'chris@bacon.com', oauthId: '5678' },
-    ]);
+    await User.create({ name: 'Arja Hallonen', email: 'arja@hallonen.com', oauthId: '1234' });
+    await User.create({ name: 'Chris P Bacon', email: 'chris@bacon.com', oauthId: '5678' });
 });
 
 afterEach(async () => {
