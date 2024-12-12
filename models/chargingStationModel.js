@@ -6,15 +6,12 @@ const chargingStationSchema = new Schema({
     location: {
         type: Object,
         required: true,
-        default: { x: 0, y: 0, radius: 0 },
+        default: { long: '', lat: '', radius: 0 },
     },
-    cityId: { type: mongoose.Schema.Types.ObjectId, ref: 'City' },
+    cityId: { type: mongoose.Schema.Types.ObjectId, ref: 'City', required: true },
     bikes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Bike' }],
 });
 
-const ChargingStation = mongoose.model(
-    'ChargingStation',
-    chargingStationSchema
-);
+const ChargingStation = mongoose.model('ChargingStation', chargingStationSchema);
 
 export default ChargingStation;
