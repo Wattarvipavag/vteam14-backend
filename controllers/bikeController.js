@@ -1,5 +1,7 @@
 import Bike from '../models/bikeModel.js';
 import City from '../models/cityModel.js';
+import Chargingstation from '../models/chargingStationModel.js';
+import ParkingArea from '../models/parkingAreaModel.js';
 
 export async function getAllBikes(req, res) {
     try {
@@ -50,7 +52,6 @@ export async function updateBike(req, res) {
         const location = req.body.location;
         const charge = req.body.charge;
         const speed = req.body.speed;
-
         const bike = await Bike.findOneAndUpdate({ _id: id }, { available, location, charge, speed });
         return res.status(200).json({ message: 'Bike updated', bike: bike });
     } catch (e) {
@@ -64,9 +65,20 @@ export async function deleteBike(req, res) {
         const bike = await Bike.findOneAndDelete({ _id: id });
         const cityId = bike.cityId;
         const city = await City.findById({ _id: cityId });
-
         city.bikes.pull(bike._id);
         await city.save();
+
+        if (bike.chargingStationId) {
+            const chargingStation = await Chargingstation.findById(bike.chargingStationId);
+            chargingStation.bikes.pull(bike._id);
+            await chargingStation.save();
+        }
+
+        if (bike.parkingAreaId) {
+            const parkingArea = await ParkingArea.findById(bike.parkingAreaId);
+            parkingArea.bikes.pull(bike._id);
+            await parkingArea.save();
+        }
         return res.status(200).json({ message: 'Bike deleted', bike: bike });
     } catch (e) {
         res.status(500).json({ message: `deleteBike ${e.message}` });

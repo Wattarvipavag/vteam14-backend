@@ -13,12 +13,12 @@ import {
 const router = Router();
 
 router.get('/', getAllCities);
-router.get('/cityId/:id', getCityById);
-router.get('/cityName/:name', getCityByName);
+router.get('/cityid/:id', getCityById);
+router.get('/cityname/:name', getCityByName);
 router.post('/', createCity);
 router.put('/:id', updateCity);
-router.delete('/cityId/:id', deleteCityById);
-router.delete('/cityName/:name', deleteCityByName);
+router.delete('/cityid/:id', deleteCityById);
+router.delete('/cityname/:name', deleteCityByName);
 router.delete('/', deleteAllCities);
 
 export default router;

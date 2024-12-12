@@ -6,7 +6,12 @@ const allowedZoneSchema = new Schema({
     location: {
         type: Object,
         required: true,
-        default: { topLeft: 0, topRight: 0, botLeft: 0, botRight: 0 },
+        default: {
+            topLeft: { long: '', lat: '' },
+            topRight: { long: '', lat: '' },
+            botLeft: { long: '', lat: '' },
+            botRight: { long: '', lat: '' },
+        },
     },
     cityId: { type: mongoose.Schema.Types.ObjectId, ref: 'City' },
 });
