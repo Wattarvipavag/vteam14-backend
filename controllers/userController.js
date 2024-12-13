@@ -15,9 +15,7 @@ export async function getUser(req, res) {
         const user = await User.findById(userId);
 
         if (!user) {
-            return res
-                .status(404)
-                .json({ message: `No user found with ${userId}` });
+            return res.status(404).json({ message: `No user found with ${userId}` });
         }
 
         return res.status(200).json({ message: 'User exists', user: user });
@@ -32,12 +30,27 @@ export async function getUserOauth(req, res) {
         const user = await User.findOne({ oauthId });
 
         if (!user) {
-            return res
-                .status(404)
-                .json({ message: `No user found with oauth id: ${oauthId}` });
+            return res.status(404).json({ message: `No user found with oauth id: ${oauthId}` });
         }
 
         return res.status(200).json({ message: 'User exists', user: user });
+    } catch (e) {
+        res.status(500).json({ message: e.message });
+    }
+}
+
+export async function updateUser(req, res) {
+    try {
+        const id = req.params.id;
+        const email = req.body.email;
+        const balance = req.body.balance;
+        const user = await User.findByIdAndUpdate({ _id: id }, { email, balance }, { new: true });
+
+        if (!user) {
+            return res.status(404).json({ message: `No user found with id: ${id}` });
+        }
+
+        return res.status(200).json({ message: 'User updated', user });
     } catch (e) {
         res.status(500).json({ message: e.message });
     }
