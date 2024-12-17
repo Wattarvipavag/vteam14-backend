@@ -30,15 +30,17 @@ export async function getBike(req, res) {
 export async function createBike(req, res) {
     try {
         const city = await City.findById(req.body.cityId);
+        const parkingArea = await ParkingArea.findById(req.body.parkingAreaId);
         const newBike = await Bike.create({
             available: req.body.name,
-            location: req.body.location,
+            location: parkingArea.location,
             cityId: req.body.cityId,
-            charge: req.body.charge,
-            speed: req.body.speed,
+            parkingAreaId: req.body.parkingAreaId,
         });
         city.bikes.push(newBike._id);
+        parkingArea.bikes.push(newBike._id);
         await city.save();
+        await parkingArea.save();
         return res.status(201).json({ message: 'Bike created', bike: newBike });
     } catch (e) {
         res.status(500).json({ message: `createBike ${e.message}` });
