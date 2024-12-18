@@ -55,3 +55,36 @@ export async function updateUser(req, res) {
         res.status(500).json({ message: e.message });
     }
 }
+
+export async function deleteUser(req, res) {
+    try {
+        const id = req.params.id;
+        const user = await User.findByIdAndDelete({ _id: id });
+
+        if (!user) {
+            return res.status(404).json({ message: `No user found with id: ${id}` });
+        }
+
+        return res.status(200).json({ message: 'User deleted', user });
+    } catch (e) {
+        res.status(500).json({ message: e.message });
+    }
+}
+
+export async function createUser(req, res) {
+    try {
+        const newUser = await User.create({
+            name: req.body.name,
+            email: req.body.email,
+            profileImage: req.body.profileImage,
+            oauthId: req.body.oauthId,
+            balance: req.body.balance,
+            role: req.body.role,
+        });
+
+        await User.save();
+        return res.status(201).json({ message: 'User created', user: newUser });
+    } catch (e) {
+        res.status(500).json({ message: `createUser ${e.message}` });
+    }
+}

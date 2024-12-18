@@ -10,6 +10,7 @@ const chargingStationSchema = new Schema({
     },
     cityId: { type: mongoose.Schema.Types.ObjectId, ref: 'City', required: true },
     bikes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Bike' }],
+    type: { type: String, default: 'Chargingstation' },
 });
 
 const ChargingStation = mongoose.model('ChargingStation', chargingStationSchema);
