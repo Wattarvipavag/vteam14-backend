@@ -43,9 +43,10 @@ export async function createCity(req, res) {
     try {
         const newCity = await City.create({
             name: req.body.name,
-            hourlyRate: req.body.hourlyRate,
+            minuteRate: req.body.minuteRate,
             surcharge: req.body.surcharge,
             discount: req.body.discount,
+            location: req.body.location,
         });
         return res.status(201).json({ message: 'City created', city: newCity });
     } catch (e) {

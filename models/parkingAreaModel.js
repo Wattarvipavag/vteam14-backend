@@ -10,6 +10,7 @@ const parkingAreaSchema = new Schema({
     },
     cityId: { type: mongoose.Schema.Types.ObjectId, ref: 'City' },
     bikes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Bike' }],
+    type: { type: String, default: 'Parkingarea' },
 });
 
 const ParkingArea = mongoose.model('ParkingArea', parkingAreaSchema);
