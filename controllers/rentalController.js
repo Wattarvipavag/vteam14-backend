@@ -2,7 +2,9 @@ import User from '../models/userModel.js';
 import Rental from '../models/rentalModel.js';
 import City from '../models/cityModel.js';
 import Bike from '../models/bikeModel.js';
-import { getRentalPrice } from '../helpers/rentalPrice.js';
+import ParkingArea from '../models/parkingAreaModel.js';
+import ChargingStation from '../models/chargingStationModel.js';
+import { getRentalPrice, isWithinArea } from '../helpers/rentalPrice.js';
 
 export async function getAllRentals(req, res) {
     try {
@@ -48,8 +50,10 @@ export async function createRental(req, res) {
     try {
         const userId = req.body.userId;
         const bikeId = req.body.bikeId;
+
         const bike = await Bike.findById({ _id: bikeId });
         const user = await User.findById({ _id: userId });
+
         const newRental = await Rental.create({
             userId: req.body.userId,
             bikeId: req.body.bikeId,
@@ -63,9 +67,23 @@ export async function createRental(req, res) {
 
         user.rentalHistory.push(newRental._id);
         await user.save();
+
+        if (bike.parkingAreaId) {
+            const parkingArea = await ParkingArea.findOne({ _id: bike.parkingAreaId });
+            parkingArea.bikes = parkingArea.bikes.filter((id) => id.toString() !== bikeId);
+            await parkingArea.save();
+        }
+
+        if (bike.chargingStationId) {
+            const chargingStation = await ChargingStation.findOne({ _id: bike.chargingStationId });
+            chargingStation.bikes = chargingStation.bikes.filter((id) => id.toString() !== bikeId);
+            await chargingStation.save();
+        }
+
         bike.available = false;
-        bike.parkingAreaId = null;
-        bike.chargingStationId = null;
+        bike.parkingAreaId = undefined;
+        bike.chargingStationId = undefined;
+
         await bike.save();
 
         return res.status(200).json({ message: 'Rental created', rental: newRental });
@@ -77,45 +95,71 @@ export async function createRental(req, res) {
 export async function endRental(req, res) {
     try {
         const rentalId = req.params.id;
-        const rental = await Rental.findByIdAndUpdate({ _id: rentalId }, { active: false });
+        const endLocation = { latitude: req.body.latitude, longitude: req.body.longitude };
 
-        if (!rental) {
-            return res.status(404).json({ message: `No rental found with ${rentalId}` });
-        }
+        const rental = await Rental.findById(rentalId);
 
+        const bike = await Bike.findById(rental.bikeId);
         const city = await City.findOne({ bikes: rental.bikeId }).populate('parkingAreas').populate('chargingStations');
 
-        if (!city) {
-            return res.status(404).json({ message: `No city holds a bike with bikeId: ${rental.bikeId}` });
+        let isInParkingArea = false;
+        let isInChargingStation = false;
+
+        for (const area of city.parkingAreas) {
+            if (isWithinArea(endLocation, area.location)) {
+                area.bikes.push(bike._id);
+                await area.save();
+                isInParkingArea = true;
+                bike.parkingAreaId = area._id;
+
+                break;
+            }
         }
 
-        const startLocation = rental.startLocation;
-        const bike = await Bike.findById({ _id: rental.bikeId });
-        const endLocation = bike.location;
-        const startTime = new Date(rental.createdAt);
-        const endTime = new Date(rental.updatedAt);
-        const surcharge = city.surcharge;
-        const discount = city.discount;
-        const minuteRate = city.minuteRate;
-        const stations = [...city.chargingStations, ...city.parkingAreas];
+        for (const station of city.chargingStations) {
+            if (isWithinArea(endLocation, station.location)) {
+                station.bikes.push(bike._id);
+                await station.save();
+                isInChargingStation = true;
+                bike.chargingStationId = station._id;
+                break;
+            }
+        }
+
+        rental.active = false;
+        rental.endLocation = endLocation;
+        await rental.save();
+
+        bike.available = true;
+        bike.location = endLocation;
+        await bike.save();
+
+        const startTime = rental.createdAt;
+        const endTime = rental.updatedAt;
+
         const totalCost = await getRentalPrice(
-            startLocation,
+            rental.startLocation,
             endLocation,
-            stations,
+            [...city.parkingAreas, ...city.chargingStations],
             startTime,
             endTime,
-            surcharge,
-            discount,
-            minuteRate,
+            city.surcharge,
+            city.discount,
+            city.minuteRate,
             bike
         );
+
         rental.totalCost = totalCost;
         await rental.save();
-        bike.available = true;
-        await bike.save();
+
+        const user = await User.findById(rental.userId);
+        user.balance -= totalCost;
+        await user.save();
+
         return res.status(200).json({ message: 'Rental ended', rental });
     } catch (e) {
-        res.status(500).json({ message: e.message });
+        console.error(`Error in endRental: ${e.message}`);
+        res.status(500).json({ message: 'Internal Server Error' });
     }
 }
 
