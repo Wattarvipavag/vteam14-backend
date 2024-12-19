@@ -6,11 +6,13 @@ import User from '../models/userModel.js';
 
 export async function getStats(req, res) {
     try {
-        const bikes = await Bike.find().exec();
-        const cities = await City.find().exec();
-        const chargingstations = await Chargingstation.find().exec();
-        const users = await User.find().exec();
-        const parkingAreas = await ParkingArea.find().exec();
+        const [bikes, cities, chargingstations, users, parkingAreas] = await Promise.all([
+            Bike.find().exec(),
+            City.find().exec(),
+            Chargingstation.find().exec(),
+            User.find().exec(),
+            ParkingArea.find().exec(),
+        ]);
 
         res.status(200).json({
             bikes: bikes.length,

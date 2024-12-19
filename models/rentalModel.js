@@ -7,8 +7,8 @@ const rentalSchema = new Schema(
         bikeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Bike' },
         totalCost: { type: Number, default: 0 },
         active: { type: Boolean, default: true },
-        startLocation: { type: Object, required: true, default: { long: '', lat: '' } },
-        endLocation: { type: Object, required: true, default: { long: '', lat: '' } },
+        startLocation: { type: Object, required: true, default: { longitude: '', latitude: '' } },
+        endLocation: { type: Object, required: true, default: { longitude: '', latitude: '' } },
     },
     { timestamps: true }
 );

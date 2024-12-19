@@ -177,3 +177,13 @@ export async function deleteRental(req, res) {
         res.status(500).json({ message: e.message });
     }
 }
+
+export async function deleteAllRentals(req, res) {
+    try {
+        await Rental.deleteMany();
+
+        return res.status(200).json({ message: 'Rentals deleted' });
+    } catch (e) {
+        res.status(500).json({ message: `deleteAllRentals ${e.message}` });
+    }
+}

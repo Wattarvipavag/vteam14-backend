@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 const citySchema = new Schema({
     name: { type: String, required: true, unique: true },
     bikes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Bike' }],
-    location: { type: Object, required: true, default: { long: '', lat: '' } },
+    location: { type: Object, required: true, default: { longitude: '', latitude: '' } },
     chargingStations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ChargingStation' }],
     parkingAreas: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ParkingArea' }],
     allowedZones: [{ type: mongoose.Schema.Types.ObjectId, ref: 'AllowedZone' }],
