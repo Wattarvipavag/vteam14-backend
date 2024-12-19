@@ -8,6 +8,7 @@ const rentalSchema = new Schema(
         totalCost: { type: Number, default: 0 },
         active: { type: Boolean, default: true },
         startLocation: { type: Object, required: true, default: { long: '', lat: '' } },
+        endLocation: { type: Object, required: true, default: { long: '', lat: '' } },
     },
     { timestamps: true }
 );
