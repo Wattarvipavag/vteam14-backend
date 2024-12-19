@@ -58,7 +58,7 @@ export async function createRental(req, res) {
         });
 
         if (!newRental) {
-            return res.status(404).json({ message: `No new rental created` });
+            return res.status(404).json({ message: 'No new rental created' });
         }
 
         user.rentalHistory.push(newRental._id);

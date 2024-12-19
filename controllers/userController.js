@@ -71,6 +71,20 @@ export async function deleteUser(req, res) {
     }
 }
 
+export async function deleteCustomers(req, res) {
+    try {
+        const customers = await User.deleteMany({ role: 'customer' });
+
+        if (!customers.deletedCount) {
+            return res.status(404).json({ message: 'No customers found with role: customer' });
+        }
+
+        return res.status(200).json({ message: 'Customers deleted', customers });
+    } catch (e) {
+        res.status(500).json({ message: e.message });
+    }
+}
+
 export async function createUser(req, res) {
     try {
         const newUser = await User.create({
@@ -82,7 +96,7 @@ export async function createUser(req, res) {
             role: req.body.role,
         });
 
-        await User.save();
+        await newUser.save();
         return res.status(201).json({ message: 'User created', user: newUser });
     } catch (e) {
         res.status(500).json({ message: `createUser ${e.message}` });

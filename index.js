@@ -10,6 +10,7 @@ import chargingStationRoutes from './routes/chargingStationRoute.js';
 import parkingAreaRoutes from './routes/parkingAreaRoute.js';
 import statsRoutes from './routes/statsRoute.js';
 import rentalRoutes from './routes/rentalRoute.js';
+import resetRoutes from './routes/resetRoute.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000; // Default port is 8000 if not defined
@@ -28,6 +29,7 @@ app.use('/api/chargingstations', chargingStationRoutes);
 app.use('/api/parkingareas', parkingAreaRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/rentals', rentalRoutes);
+app.use('/api/reset', resetRoutes);
 
 // Export app for testing
 export { app };
