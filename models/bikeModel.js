@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const bikeSchema = new Schema({
     available: { type: Boolean, required: true, default: true },
-    location: { type: Object, required: true, default: { long: '', lat: '' } },
+    location: { type: Object, required: true, default: { longitude: '', latitude: '' } },
     cityId: { type: mongoose.Schema.Types.ObjectId, ref: 'City' },
     chargingStationId: { type: mongoose.Schema.Types.ObjectId, ref: 'ChargingStation' },
     parkingAreaId: { type: mongoose.Schema.Types.ObjectId, ref: 'ParkingArea' },

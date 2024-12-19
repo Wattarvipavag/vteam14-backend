@@ -12,11 +12,13 @@ export async function getRentalPrice(startLocation, endLocation, stations, start
     const FIXED_RADIUS = 50; // Fixed radius in meters
 
     const isStartInside = stations.some(
-        (station) => calculateDistance(startLocation, { latitude: station.latitude, longitude: station.longitude }) <= FIXED_RADIUS
+        (station) =>
+            calculateDistance(startLocation, { latitude: station.location.latitude, longitude: station.location.longitude }) <= FIXED_RADIUS
     );
 
     const isEndInside = stations.some(
-        (station) => calculateDistance(endLocation, { latitude: station.latitude, longitude: station.longitude }) <= FIXED_RADIUS
+        (station) =>
+            calculateDistance(endLocation, { latitude: station.location.latitude, longitude: station.location.longitude }) <= FIXED_RADIUS
     );
 
     if (isStartInside && isEndInside) {
@@ -46,8 +48,6 @@ export async function getRentalPrice(startLocation, endLocation, stations, start
     }
 
     totalCost = parseFloat(totalCost.toFixed(2));
-
-    console.log(applyDiscount, applySurcharge, totalCost);
 
     return totalCost;
 }
