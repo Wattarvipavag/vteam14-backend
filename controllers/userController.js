@@ -39,6 +39,15 @@ export async function getUserOauth(req, res) {
     }
 }
 
+export async function getUserHistory(req, res) {
+    try {
+        const user = await User.findOne({ oauthId: req.params.id }).populate('rentalHistory');
+        return res.status(201).json({ message: 'User History: ', user });
+    } catch (e) {
+        res.status(500).json({ message: `getUserHistory ${e.message}` });
+    }
+}
+
 export async function updateUser(req, res) {
     try {
         const id = req.params.id;
