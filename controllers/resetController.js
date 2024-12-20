@@ -261,6 +261,9 @@ async function addBikes(data = [], toWhat = '', numberOfBikes = 0, id = '') {
                             charge: charge,
                             parkingAreaId: parkingId,
                         });
+                        const city = await City.findById(id);
+                        city.bikes.push(newBike._id);
+                        await city.save();
                         await ParkingArea.updateOne({ _id: parkingId }, { $push: { bikes: newBike._id } });
                     }
                 } catch (e) {
@@ -282,6 +285,9 @@ async function addBikes(data = [], toWhat = '', numberOfBikes = 0, id = '') {
                             charge: charge,
                             chargingStationId: chargingId,
                         });
+                        const city = await City.findById(id);
+                        city.bikes.push(newBike._id);
+                        await city.save();
                         await ChargingStation.updateOne({ _id: chargingId }, { $push: { bikes: newBike._id } });
                     }
                 } catch (e) {
@@ -299,8 +305,7 @@ async function addBikes(data = [], toWhat = '', numberOfBikes = 0, id = '') {
                         cityId: bike.cityId,
                         charge: charge,
                     });
-
-                    await City.updateOne({ _id: data.cityId }, { $push: { bikes: randBike._id } });
+                    await City.updateOne({ _id: bike.cityId }, { $push: { bikes: randBike._id } });
                 } catch (e) {
                     throw new Error('Error adding bikes to cities: ' + e.message);
                 }
