@@ -2,6 +2,7 @@ import Bike from '../models/bikeModel.js';
 import City from '../models/cityModel.js';
 import Chargingstation from '../models/chargingStationModel.js';
 import ParkingArea from '../models/parkingAreaModel.js';
+import QRCode from 'qrcode';
 
 export async function getAllBikes(req, res) {
     try {
@@ -31,12 +32,20 @@ export async function createBike(req, res) {
     try {
         const city = await City.findById(req.body.cityId);
         const parkingArea = await ParkingArea.findById(req.body.parkingAreaId);
+
         const newBike = await Bike.create({
             available: req.body.name,
             location: parkingArea.location,
             cityId: req.body.cityId,
             parkingAreaId: req.body.parkingAreaId,
         });
+
+        const qrCodeUrl = newBike._id.toString();
+        const qrCode = await QRCode.toDataURL(qrCodeUrl);
+
+        newBike.qrCode = qrCode;
+        await newBike.save();
+
         city.bikes.push(newBike._id);
         parkingArea.bikes.push(newBike._id);
         await city.save();

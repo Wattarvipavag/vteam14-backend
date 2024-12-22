@@ -5,6 +5,7 @@ import ParkingArea from '../models/parkingAreaModel.js';
 import User from '../models/userModel.js';
 import Rental from '../models/rentalModel.js';
 import { cities, getParkingAreas, getChargingStations, getBikeDetails } from '../db/repopulateDbConfig.js';
+import QRCode from 'qrcode';
 
 export async function deleteAll(req, res) {
     try {
@@ -157,6 +158,13 @@ async function addBikes(data = [], toWhat = '', numberOfBikes = 0, id = '') {
                     }));
                     const mongooseBikes = await Bike.insertMany(bikes);
 
+                    mongooseBikes.forEach(async (bike) => {
+                        const qrCodeUrl = bike._id.toString();
+                        const qrCode = await QRCode.toDataURL(qrCodeUrl);
+                        bike.qrCode = qrCode;
+                        await bike.save();
+                    });
+
                     const cityUpdatePromises = mongooseBikes.map((bike) =>
                         City.updateOne({ _id: bike.cityId }, { $push: { bikes: { $each: [bike._id] } } })
                     );
@@ -184,6 +192,13 @@ async function addBikes(data = [], toWhat = '', numberOfBikes = 0, id = '') {
                     }));
                     const mongooseBikes = await Bike.insertMany(bikes);
 
+                    mongooseBikes.forEach(async (bike) => {
+                        const qrCodeUrl = bike._id.toString();
+                        const qrCode = await QRCode.toDataURL(qrCodeUrl);
+                        bike.qrCode = qrCode;
+                        await bike.save();
+                    });
+
                     const cityUpdatePromises = mongooseBikes.map((bike) =>
                         City.updateOne({ _id: bike.cityId }, { $push: { bikes: { $each: [bike._id] } } })
                     );
@@ -207,6 +222,14 @@ async function addBikes(data = [], toWhat = '', numberOfBikes = 0, id = '') {
             }));
 
             const mongooseBikes = await Bike.insertMany(bikes);
+
+            mongooseBikes.forEach(async (bike) => {
+                const qrCodeUrl = bike._id.toString();
+                const qrCode = await QRCode.toDataURL(qrCodeUrl);
+                bike.qrCode = qrCode;
+                await bike.save();
+            });
+
             const cityUpdatePromises = mongooseBikes.map((bike) =>
                 City.updateOne({ _id: bike.cityId }, { $push: { bikes: { $each: [bike._id] } } })
             );

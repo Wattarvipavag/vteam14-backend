@@ -9,6 +9,7 @@ const bikeSchema = new Schema({
     parkingAreaId: { type: mongoose.Schema.Types.ObjectId, ref: 'ParkingArea' },
     charge: { type: Number, required: true, default: 100 },
     speed: { type: Number, required: true, default: 0 },
+    qrCode: { type: String, default: '' },
 });
 
 const Bike = mongoose.model('Bike', bikeSchema);
