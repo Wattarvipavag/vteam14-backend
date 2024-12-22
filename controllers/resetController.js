@@ -24,12 +24,17 @@ export async function deleteAll(req, res) {
 
 export async function recreateAll(req, res) {
     try {
+        const bikesToAddToCharging = req.body.bikesToAddToCharging ?? 3;
+        const bikesToAddToParking = req.body.bikesToAddToParking ?? 5;
+        const customersToCreate = req.body.customersToCreate ?? 20;
         const cityIds = await createCities(cities);
-        const parkings = await insertParkings(cityIds);
-        const chargings = await insertChargingstations(cityIds);
-        const bikeDetails = await getBikeDetails(cityIds);
-        const bikes = await addBikes(bikeDetails, 'cities');
-        const allCities = await City.find().exec();
+        const [parkings, chargings, bikeDetails, customers] = await Promise.all([
+            insertParkings(cityIds, bikesToAddToParking),
+            insertChargingstations(cityIds, bikesToAddToCharging),
+            getBikeDetails(cityIds),
+            createCustomers(customersToCreate),
+        ]);
+        const [bikes, allCities] = await Promise.all([addBikes(bikeDetails, 'cities'), City.find().exec()]);
 
         return res.status(200).json({
             message: `${cityIds.length} cities added successfully. ${parkings.count} parkings added successfully, with ${
@@ -38,7 +43,7 @@ export async function recreateAll(req, res) {
                 chargings.totalBikesAdded
             } bikes. ${bikes} bikes added outside chargingstations or parking areas. ${
                 parkings.totalBikesAdded + chargings.totalBikesAdded + bikes
-            } total bikes added.`,
+            } total bikes added. ${customers.length} customers added.`,
             cities: allCities,
             parkings: parkings,
             chargings: chargings,
@@ -61,7 +66,7 @@ async function createCities(cities) {
     return insertedIds;
 }
 
-async function insertParkings(cityIds) {
+async function insertParkings(cityIds, numBikesToAddToEach) {
     const parkingAreas = getParkingAreas(cityIds);
     try {
         const mongooseParkings = await ParkingArea.insertMany(parkingAreas);
@@ -83,10 +88,10 @@ async function insertParkings(cityIds) {
         await Promise.all(cityUpdatePromises);
 
         // Add bikes to parking areas
-        const bikePromises = mongooseParkings.map((parking) => addBikes([parking._id], 'parking', 5, parking.cityId));
+        const bikePromises = mongooseParkings.map((parking) => addBikes([parking._id], 'parking', numBikesToAddToEach, parking.cityId));
         // An array of number of bikes per parking
-        const numBikes = await Promise.all(bikePromises);
-        const totalBikesAdded = numBikes.reduce((sum, count) => sum + count, 0);
+        await Promise.all(bikePromises);
+        const totalBikesAdded = num * numBikesToAddToEach;
 
         return { count: num, mongooseParkings, totalBikesAdded };
     } catch (error) {
@@ -94,7 +99,7 @@ async function insertParkings(cityIds) {
     }
 }
 
-async function insertChargingstations(cityIds) {
+async function insertChargingstations(cityIds, numBikesToAddToEach) {
     const chargingStations = getChargingStations(cityIds);
     try {
         const mongooseChargings = await ChargingStation.insertMany(chargingStations);
@@ -117,7 +122,7 @@ async function insertChargingstations(cityIds) {
 
         // Add bikes to charging stations
         const bikePromises = mongooseChargings.map((chargingStation) =>
-            addBikes([chargingStation._id], 'charging', 3, chargingStation.cityId)
+            addBikes([chargingStation._id], 'charging', numBikesToAddToEach, chargingStation.cityId)
         );
         // An array of number of bikes per parking
         const numBikes = await Promise.all(bikePromises);
@@ -211,5 +216,27 @@ async function addBikes(data = [], toWhat = '', numberOfBikes = 0, id = '') {
             throw new Error('Error adding bikes to cities: ' + e.message);
         }
         return numAddedBikes;
+    }
+}
+
+async function createCustomers(numberOfCustomersToCreate) {
+    if (typeof numberOfCustomersToCreate !== 'number' || numberOfCustomersToCreate < 1 || numberOfCustomersToCreate > 1000) {
+        throw new Error(
+            `Invalid number of customers to create: ${numberOfCustomersToCreate}. The value must be a number between 1 and 1000.`
+        );
+    }
+    try {
+        const customers = Array.from({ length: numberOfCustomersToCreate }, (_, index) => ({
+            name: `Botumer${index} Botsson`,
+            email: `Botumer${index}.Botsson@wattbot.se`,
+            profileImage: 'https://imgur.com/KQ7fQ2E.png',
+            oauthId: `botAuth${index}`,
+            balance: 500,
+            role: 'customer',
+        }));
+        const mongooseCustomers = await User.insertMany(customers);
+        return mongooseCustomers;
+    } catch (e) {
+        throw new Error('Error adding customers: ' + e.message);
     }
 }
