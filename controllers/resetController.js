@@ -25,6 +25,7 @@ export async function deleteAll(req, res) {
 
 export async function recreateAll(req, res) {
     try {
+        console.time('Recreation');
         const bikesToAddToCharging = req.body.bikesToAddToCharging ?? 3;
         const bikesToAddToParking = req.body.bikesToAddToParking ?? 5;
         const customersToCreate = req.body.customersToCreate ?? 20;
@@ -36,6 +37,7 @@ export async function recreateAll(req, res) {
             createCustomers(customersToCreate),
         ]);
         const [bikes, allCities] = await Promise.all([addBikes(bikeDetails, 'cities'), City.find().exec()]);
+        console.timeEnd('Recreation');
 
         return res.status(200).json({
             message: `${cityIds.length} cities added successfully. ${parkings.count} parkings added successfully, with ${
@@ -82,11 +84,15 @@ async function insertParkings(cityIds, numBikesToAddToEach) {
             return updates;
         }, {});
 
-        // Update cities with parking areas in batches
-        const cityUpdatePromises = Object.entries(cityUpdates).map(([cityId, parkingIds]) =>
-            City.updateOne({ _id: cityId }, { $push: { parkingAreas: { $each: parkingIds } } })
-        );
-        await Promise.all(cityUpdatePromises);
+        // Create everything that will be written to the db in a bulk mapping over the updated values in cityUpdates
+        const cityUpdateBulk = Object.entries(cityUpdates).map(([cityId, parkingIds]) => ({
+            updateOne: {
+                filter: { _id: cityId },
+                update: { $push: { parkingAreas: { $each: parkingIds } } },
+            },
+        }));
+
+        await City.bulkWrite(cityUpdateBulk);
 
         // Add bikes to parking areas
         const bikePromises = mongooseParkings.map((parking) => addBikes([parking._id], 'parking', numBikesToAddToEach, parking.cityId));
@@ -115,11 +121,15 @@ async function insertChargingstations(cityIds, numBikesToAddToEach) {
             return updates;
         }, {});
 
-        // Update cities with charging stations in batches
-        const cityUpdatePromises = Object.entries(cityUpdates).map(([cityId, chargingStationIds]) =>
-            City.updateOne({ _id: cityId }, { $push: { chargingStations: { $each: chargingStationIds } } })
-        );
-        await Promise.all(cityUpdatePromises);
+        // Create everything that will be written to the db in a bulk mapping over the updated values in cityUpdates
+        const cityUpdateBulk = Object.entries(cityUpdates).map(([cityId, chargingIds]) => ({
+            updateOne: {
+                filter: { _id: cityId },
+                update: { $push: { parkingAreas: { $each: chargingIds } } },
+            },
+        }));
+
+        await City.bulkWrite(cityUpdateBulk);
 
         // Add bikes to charging stations
         const bikePromises = mongooseChargings.map((chargingStation) =>
@@ -158,20 +168,41 @@ async function addBikes(data = [], toWhat = '', numberOfBikes = 0, id = '') {
                     }));
                     const mongooseBikes = await Bike.insertMany(bikes);
 
-                    mongooseBikes.forEach(async (bike) => {
-                        const qrCodeUrl = bike._id.toString();
-                        const qrCode = await QRCode.toDataURL(qrCodeUrl);
-                        bike.qrCode = qrCode;
-                        await bike.save();
-                    });
+                    const qrCodes = await Promise.all(
+                        mongooseBikes.map((bike) =>
+                            QRCode.toDataURL(bike._id.toString()).then((qrCode) => ({
+                                _id: bike._id,
+                                qrCode,
+                            }))
+                        )
+                    );
 
-                    const cityUpdatePromises = mongooseBikes.map((bike) =>
-                        City.updateOne({ _id: bike.cityId }, { $push: { bikes: { $each: [bike._id] } } })
-                    );
-                    const parkingUpdatePromises = mongooseBikes.map((bike) =>
-                        ParkingArea.updateOne({ _id: bike.parkingAreaId }, { $push: { bikes: { $each: [bike._id] } } })
-                    );
-                    await Promise.all([...cityUpdatePromises, ...parkingUpdatePromises]);
+                    // Create everything that will be written to the db in a bulk mapping over the  values in qrCodes
+                    const qrUpdateBulk = qrCodes.map(({ _id, qrCode }) => ({
+                        updateOne: {
+                            filter: { _id },
+                            update: { $set: { qrCode } },
+                        },
+                    }));
+                    await Bike.bulkWrite(qrUpdateBulk);
+
+                    // Create everything that will be written to the db in a bulk mapping over the  values in mongooseBikes
+                    const cityUpdateBulk = mongooseBikes.map((bike) => ({
+                        updateOne: {
+                            filter: { _id: bike.cityId },
+                            update: { $push: { bikes: bike._id } },
+                        },
+                    }));
+
+                    // Create everything that will be written to the db in a bulk mapping over the  values in mongooseBikes
+                    const parkingAreaUpdateBulk = mongooseBikes.map((bike) => ({
+                        updateOne: {
+                            filter: { _id: bike.parkingAreaId },
+                            update: { $push: { bikes: bike._id } },
+                        },
+                    }));
+
+                    await Promise.all([City.bulkWrite(cityUpdateBulk), ParkingArea.bulkWrite(parkingAreaUpdateBulk)]);
                     numAddedBikes += mongooseBikes.length;
                 } catch (e) {
                     throw new Error(`Error adding bikes to parking areas, stopped at parkingAreaId ${parkingId}` + e.message);
@@ -192,20 +223,42 @@ async function addBikes(data = [], toWhat = '', numberOfBikes = 0, id = '') {
                     }));
                     const mongooseBikes = await Bike.insertMany(bikes);
 
-                    mongooseBikes.forEach(async (bike) => {
-                        const qrCodeUrl = bike._id.toString();
-                        const qrCode = await QRCode.toDataURL(qrCodeUrl);
-                        bike.qrCode = qrCode;
-                        await bike.save();
-                    });
+                    const qrCodes = await Promise.all(
+                        mongooseBikes.map((bike) =>
+                            QRCode.toDataURL(bike._id.toString()).then((qrCode) => ({
+                                _id: bike._id,
+                                qrCode,
+                            }))
+                        )
+                    );
 
-                    const cityUpdatePromises = mongooseBikes.map((bike) =>
-                        City.updateOne({ _id: bike.cityId }, { $push: { bikes: { $each: [bike._id] } } })
-                    );
-                    const chargingUpdatePromises = mongooseBikes.map((bike) =>
-                        ChargingStation.updateOne({ _id: bike.chargingStationId }, { $push: { bikes: { $each: [bike._id] } } })
-                    );
-                    await Promise.all([...cityUpdatePromises, ...chargingUpdatePromises]);
+                    // Create everything that will be written to the db in a bulk mapping over the  values in qrCodes
+                    const qrUpdateBulk = qrCodes.map(({ _id, qrCode }) => ({
+                        updateOne: {
+                            filter: { _id },
+                            update: { $set: { qrCode } },
+                        },
+                    }));
+                    await Bike.bulkWrite(qrUpdateBulk);
+
+                    // Create everything that will be written to the db in a bulk mapping over the  values in mongooseBikes
+                    const cityUpdateBulk = mongooseBikes.map((bike) => ({
+                        updateOne: {
+                            filter: { _id: bike.cityId },
+                            update: { $push: { bikes: bike._id } },
+                        },
+                    }));
+
+                    // Create everything that will be written to the db in a bulk mapping over the  values in mongooseBikes
+                    const chargingStationUpdateBulk = mongooseBikes.map((bike) => ({
+                        updateOne: {
+                            filter: { _id: bike.chargingStationId },
+                            update: { $push: { bikes: bike._id } },
+                        },
+                    }));
+
+                    // Wait for both bulkWrites to be complete
+                    await Promise.all([City.bulkWrite(cityUpdateBulk), ChargingStation.bulkWrite(chargingStationUpdateBulk)]);
                     numAddedBikes += mongooseBikes.length;
                 } catch (e) {
                     throw new Error(`Error adding bikes to charging stations, stopped at chargingStationId ${chargingId}` + e.message);
@@ -223,17 +276,33 @@ async function addBikes(data = [], toWhat = '', numberOfBikes = 0, id = '') {
 
             const mongooseBikes = await Bike.insertMany(bikes);
 
-            mongooseBikes.forEach(async (bike) => {
-                const qrCodeUrl = bike._id.toString();
-                const qrCode = await QRCode.toDataURL(qrCodeUrl);
-                bike.qrCode = qrCode;
-                await bike.save();
-            });
-
-            const cityUpdatePromises = mongooseBikes.map((bike) =>
-                City.updateOne({ _id: bike.cityId }, { $push: { bikes: { $each: [bike._id] } } })
+            const qrCodes = await Promise.all(
+                mongooseBikes.map((bike) =>
+                    QRCode.toDataURL(bike._id.toString()).then((qrCode) => ({
+                        _id: bike._id,
+                        qrCode,
+                    }))
+                )
             );
-            await Promise.all(cityUpdatePromises);
+
+            // Create everything that will be written to the db in a bulk mapping over the  values in qrCodes
+            const qrUpdateBulk = qrCodes.map(({ _id, qrCode }) => ({
+                updateOne: {
+                    filter: { _id },
+                    update: { $set: { qrCode } },
+                },
+            }));
+            await Bike.bulkWrite(qrUpdateBulk);
+
+            // Create everything that will be written to the db in a bulk mapping over the  values in mongooseBikes
+            const cityUpdateBulk = mongooseBikes.map((bike) => ({
+                updateOne: {
+                    filter: { _id: bike.cityId },
+                    update: { $push: { bikes: bike._id } },
+                },
+            }));
+
+            await City.bulkWrite(cityUpdateBulk);
             numAddedBikes += mongooseBikes.length;
         } catch (e) {
             throw new Error('Error adding bikes to cities: ' + e.message);
