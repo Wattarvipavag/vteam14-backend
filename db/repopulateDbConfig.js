@@ -32,7 +32,7 @@ export async function getBikeDetails(cityIds) {
         {
             city: 'Kalmar',
             bikes: [
-                { cityId: 'dynamic mongooseCityId', location: { latitude: '56.67005631226999', longitude: '16.376951417852773' } },
+                { cityId: 'dynamic mongooseCityId', location: { latitude: '56.67005631226999', longitude: '16.376951417852773' } }, //route: [{ latitude: '56.67005631226999', longitude: '16.376951417852773' }, { latitude: '56.67005631226999', longitude: '16.376951417852773' }]
                 { cityId: 'dynamic mongooseCityId', location: { latitude: '56.674599377831505', longitude: '16.335886217442393' } },
                 { cityId: 'dynamic mongooseCityId', location: { latitude: '56.66550520819479', longitude: '16.34887754075502' } },
             ],
