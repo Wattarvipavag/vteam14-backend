@@ -4,7 +4,8 @@ class SimulatedBike {
         this.step = 0;
     }
 
-    function moveToNextWayPoint() {
+    moveToNextWayPoint() {
+        console.log('Moved');
         //Step through an array
 
         // if (this.step === (this.rout.length - 1) && !this.routeCompleted) {
@@ -15,4 +16,4 @@ class SimulatedBike {
     }
 }
 
-export { SimulatedBike };
+export default SimulatedBike;
