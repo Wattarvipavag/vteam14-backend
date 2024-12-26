@@ -8,32 +8,44 @@ export const cities = [
 /**
  * Function that returns bike objects to be added to the database.
  * @param {Array} cityIds- array of the id's which we use to set each cityId with
- * @param {Array} bikeIds- array of the id's which we use to set each bikeId with
+ * @param {Array} bikes- array of bike objects which we use to set the dynamic values of each bike
  * @return {Array} returns an array of bike objects ready to be sent to the database.
  *
  */
-export function getBikeDetails(cityIds, bikeIds = []) {
+export function getBikeDetails(cityIds, bikes = []) {
     const cityBikes = [
         {
             city: 'Stockholm',
             bikes: [
                 {
-                    bikeId: 'dynamic mongooseBikeId',
+                    _id: 'dynamic mongooseBikeId',
                     cityId: 'dynamic mongooseCityId',
                     location: { latitude: '59.312379874896415', longitude: '18.08778003565807' },
                     route: [{ latitude: '', longitude: '' }],
+                    charge: 'dynamic',
+                    speed: 0,
+                    available: true,
+                    qrCode: 'dynamic',
                 },
                 {
-                    bikeId: 'dynamic mongooseBikeId',
+                    _id: 'dynamic mongooseBikeId',
                     cityId: 'dynamic mongooseCityId',
                     location: { latitude: '59.33274954329449', longitude: '18.06940575824523' },
                     route: [{ latitude: '', longitude: '' }],
+                    charge: 'dynamic',
+                    speed: 0,
+                    available: true,
+                    qrCode: 'dynamic',
                 },
                 {
-                    bikeId: 'dynamic mongooseBikeId',
+                    _id: 'dynamic mongooseBikeId',
                     cityId: 'dynamic mongooseCityId',
                     location: { latitude: '59.345020367735124', longitude: '18.039699253190946' },
                     route: [{ latitude: '', longitude: '' }],
+                    charge: 'dynamic',
+                    speed: 0,
+                    available: true,
+                    qrCode: 'dynamic',
                 },
             ],
         },
@@ -41,22 +53,34 @@ export function getBikeDetails(cityIds, bikeIds = []) {
             city: 'Uppsala',
             bikes: [
                 {
-                    bikeId: 'dynamic mongooseBikeId',
+                    _id: 'dynamic mongooseBikeId',
                     cityId: 'dynamic mongooseCityId',
                     location: { latitude: '59.86095430245953', longitude: '17.63769300562198' },
                     route: [{ latitude: '', longitude: '' }],
+                    charge: 'dynamic',
+                    speed: 0,
+                    available: true,
+                    qrCode: 'dynamic',
                 },
                 {
-                    bikeId: 'dynamic mongooseBikeId',
+                    _id: 'dynamic mongooseBikeId',
                     cityId: 'dynamic mongooseCityId',
                     location: { latitude: '59.852973954834496', longitude: '17.644766355743457' },
                     route: [{ latitude: '', longitude: '' }],
+                    charge: 'dynamic',
+                    speed: 0,
+                    available: true,
+                    qrCode: 'dynamic',
                 },
                 {
-                    bikeId: 'dynamic mongooseBikeId',
+                    _id: 'dynamic mongooseBikeId',
                     cityId: 'dynamic mongooseCityId',
                     location: { latitude: '59.86287295220117', longitude: '17.61381655077588' },
                     route: [{ latitude: '', longitude: '' }],
+                    charge: 'dynamic',
+                    speed: 0,
+                    available: true,
+                    qrCode: 'dynamic',
                 },
             ],
         },
@@ -64,22 +88,34 @@ export function getBikeDetails(cityIds, bikeIds = []) {
             city: 'Kalmar',
             bikes: [
                 {
-                    bikeId: 'dynamic mongooseBikeId',
+                    _id: 'dynamic mongooseBikeId',
                     cityId: 'dynamic mongooseCityId',
                     location: { latitude: '56.67005631226999', longitude: '16.376951417852773' },
                     route: [{ latitude: '', longitude: '' }],
+                    charge: 'dynamic',
+                    speed: 0,
+                    available: true,
+                    qrCode: 'dynamic',
                 },
                 {
-                    bikeId: 'dynamic mongooseBikeId',
+                    _id: 'dynamic mongooseBikeId',
                     cityId: 'dynamic mongooseCityId',
                     location: { latitude: '56.674599377831505', longitude: '16.335886217442393' },
                     route: [{ latitude: '', longitude: '' }],
+                    charge: 'dynamic',
+                    speed: 0,
+                    available: true,
+                    qrCode: 'dynamic',
                 },
                 {
-                    bikeId: 'dynamic mongooseBikeId',
+                    _id: 'dynamic mongooseBikeId',
                     cityId: 'dynamic mongooseCityId',
                     location: { latitude: '56.66550520819479', longitude: '16.34887754075502' },
                     route: [{ latitude: '', longitude: '' }],
+                    charge: 'dynamic',
+                    speed: 0,
+                    available: true,
+                    qrCode: 'dynamic',
                 },
             ],
         },
@@ -87,22 +123,34 @@ export function getBikeDetails(cityIds, bikeIds = []) {
             city: 'Halmstad',
             bikes: [
                 {
-                    bikeId: 'dynamic mongooseBikeId',
+                    _id: 'dynamic mongooseBikeId',
                     cityId: 'dynamic mongooseCityId',
                     location: { latitude: '56.677249194094976', longitude: '12.859233486346115' },
                     route: [{ latitude: '', longitude: '' }],
+                    charge: 'dynamic',
+                    speed: 0,
+                    available: true,
+                    qrCode: 'dynamic',
                 },
                 {
-                    bikeId: 'dynamic mongooseBikeId',
+                    _id: 'dynamic mongooseBikeId',
                     cityId: 'dynamic mongooseCityId',
                     location: { latitude: '56.68190968896822', longitude: '12.86112721883696' },
                     route: [{ latitude: '', longitude: '' }],
+                    charge: 'dynamic',
+                    speed: 0,
+                    available: true,
+                    qrCode: 'dynamic',
                 },
                 {
-                    bikeId: 'dynamic mongooseBikeId',
+                    _id: 'dynamic mongooseBikeId',
                     cityId: 'dynamic mongooseCityId',
                     location: { latitude: '56.68127662001243', longitude: '12.846102269519257' },
                     route: [{ latitude: '', longitude: '' }],
+                    charge: 'dynamic',
+                    speed: 0,
+                    available: true,
+                    qrCode: 'dynamic',
                 },
             ],
         },
@@ -117,9 +165,11 @@ export function getBikeDetails(cityIds, bikeIds = []) {
             cityObject.bikes.forEach((bike) => {
                 bike.cityId = cityIds[index];
 
-                // If an array of bikeIds is provided we also set that dynamicly
-                if (bikeIds[bikeIdsIndex]) {
-                    bike.bikeId = bikeIds[bikeIdsIndex];
+                // If an array of bikes is provided we set what we can dynamicly
+                if (bikes[bikeIdsIndex]) {
+                    bike._id = bikes[bikeIdsIndex]._id;
+                    bike.charge = bikes[bikeIdsIndex].charge;
+                    bike.qrCode = bikes[bikeIdsIndex].qrCode;
                     bikeIdsIndex += 1;
                 }
             });
@@ -145,7 +195,31 @@ export function getParkingAreas(cityIds, parkingAreaIds = []) {
                     name: 'Luma Parkering',
                     location: { latitude: '59.303954964144125', longitude: '18.09577990860332' },
                     cityId: 'dynamic mongooseId',
-                    routes: [{ latitude: '59.303954964144125', longitude: '18.09577990860332' }],
+                    routes: [
+                        [
+                            { latitude: '59.303401068243986', longitude: '18.090499356938125' },
+                            { latitude: '59.302501643691336', longitude: '18.086805145096353' },
+                            { latitude: '59.30247843240863', longitude: '18.08080347130994' },
+                            { latitude: '59.30500836773979', longitude: '18.078825646759597' },
+                            { latitude: '59.30775880781413', longitude: '18.07660830784623' },
+                            { latitude: '59.3116628131025', longitude: '18.074544064258774' },
+                            { latitude: '59.314197866171405', longitude: '18.073396016718238' },
+                            { latitude: '59.314946959521635', longitude: '18.070728825265984' },
+                            { latitude: '59.314748084274946', longitude: '18.068159584904965' },
+                        ],
+                        [
+                            { latitude: '59.30572775711249', longitude: '18.099341889835472' },
+                            { latitude: '59.30825352428685', longitude: '18.097668150048584' },
+                            { latitude: '59.312654090249325', longitude: '18.09923211213345' },
+                            { latitude: '59.314026523838805', longitude: '18.08820414729506' },
+                            { latitude: '59.317749901721484', longitude: '18.082492120265037' },
+                            { latitude: '59.32020710771819', longitude: '18.072172947790794' },
+                            { latitude: '59.32502957451091', longitude: '18.0757813628873' },
+                            { latitude: '59.33061155406759', longitude: '18.072893415036578' },
+                            { latitude: '59.332624111519245', longitude: '18.06811247932973' },
+                            { latitude: '59.33230376800273', longitude: '18.065475225880878' },
+                        ],
+                    ],
                 },
                 {
                     parkingAreaId: 'dynamic mongooseId',

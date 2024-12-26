@@ -12,18 +12,19 @@ export async function startSimulation(req, res) {
         const parkingAreaIds = cities.flatMap((city) => city.parkingAreas.map((parking) => parking._id));
         const chargingStationIds = cities.flatMap((city) => city.chargingStations.map((station) => station._id));
         const allBikes = cities.flatMap((city) => city.bikes);
-        const floatingBikeIds = [];
+        const floatingBikes = [];
         allBikes.forEach((bike) => {
             if (!bike.chargingStationId && !bike.parkingAreaId) {
-                floatingBikeIds.push(bike._id);
+                floatingBikes.push(bike);
             }
         });
-        const floatingBikes = getBikeDetails(cityIds, floatingBikeIds);
+        const updatedFloatingBikes = getBikeDetails(cityIds, floatingBikes);
         const parkingAreas = getParkingAreas(cityIds, parkingAreaIds);
         const chargingStations = getChargingStations(cityIds, chargingStationIds);
         const customers = await User.find({ role: 'customer' });
-        simulation = new Simulation(cities, parkingAreas, chargingStations, allBikes, floatingBikes, customers);
+        simulation = new Simulation(cities, parkingAreas, chargingStations, allBikes, updatedFloatingBikes, customers);
         simulation.startSim();
+        console.log('Sim started');
 
         return res.status(200).json({ message: 'Simulation started!', simulation });
     } catch (e) {
