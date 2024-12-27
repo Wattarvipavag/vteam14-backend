@@ -25,8 +25,8 @@ export async function deleteAll(req, res) {
 
 export async function recreateAll(req, res) {
     try {
-        const bikesToAddToCharging = req.body.bikesToAddToCharging ?? 3;
-        const bikesToAddToParking = req.body.bikesToAddToParking ?? 5;
+        const bikesToAddToCharging = req.body.bikesToAddToCharging ?? 1;
+        const bikesToAddToParking = req.body.bikesToAddToParking ?? 1;
         const customersToCreate = req.body.customersToCreate ?? 20;
         const cityIds = await createCities(cities);
         const [parkings, chargings, bikeDetails, customers] = await Promise.all([
@@ -123,7 +123,7 @@ async function insertChargingstations(cityIds, numBikesToAddToEach) {
         const cityUpdateBulk = Object.entries(cityUpdates).map(([cityId, chargingIds]) => ({
             updateOne: {
                 filter: { _id: cityId },
-                update: { $push: { parkingAreas: { $each: chargingIds } } },
+                update: { $push: { chargingStations: { $each: chargingIds } } },
             },
         }));
 
