@@ -40,8 +40,17 @@ export async function getSimUpdate() {
 }
 
 export async function endSimulation(req, res) {
-    simulation = null;
-    return res.status(200).json({ message: 'Simulation stopped!', simulation });
+    if (simulation) {
+        try {
+            await simulation.stopSim();
+            simulation = null;
+            console.log('Simulation ending, stopping all bikes');
+            return res.status(200).json({ message: 'Simulation stopped!', simulation });
+        } catch (e) {
+            console.error('Error ending sim', e);
+            return res.status(500).json({ message: e.message });
+        }
+    }
 }
 
 export async function stopBike(req, res) {
