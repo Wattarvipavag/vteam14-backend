@@ -164,6 +164,19 @@ class Simulation {
         console.log(id, ' Stopped');
     }
 
+    getUpdatedData() {
+        const bikeIdArray = Object.keys(this.rentals);
+        bikeIdArray.forEach((bikeId) => {
+            const location = this.bikes[bikeId].getLocation();
+            const charge = this.bikes[bikeId].getCharge();
+            const available = this.bikes[bikeId].getAvailability();
+            this.rentals[bikeId].location = location;
+            this.rentals[bikeId].charge = charge;
+            this.rentals[bikeId].available = available;
+        });
+        return this.rentals;
+    }
+
     /**
      * Shuffles array in place.
      * @param {Array} a items An array containing the items.
