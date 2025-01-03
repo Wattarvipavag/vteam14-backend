@@ -42,7 +42,7 @@ class SimulatedBike {
         if (this.charge > 10) {
             this.location = this.route[this.step];
             this.step += 1;
-            this.charge -= 5;
+            this.route.length > 7 ? (this.charge -= 3) : (this.charge -= 5);
             this.speed = Math.floor(Math.random() * this.bikeMaxSpeed);
             console.log('Moved bike: ', this._id, 'On step: ', this.step, 'Current speed: ', this.speed, 'Current charge: ', this.charge);
 
