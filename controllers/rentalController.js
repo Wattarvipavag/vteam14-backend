@@ -154,6 +154,9 @@ export async function endRental(req, res) {
 
         const user = await User.findById(rental.userId);
         user.balance -= totalCost;
+        if (!user.rentalHistory.includes(rentalId)) {
+            user.rentalHistory.push(rentalId);
+        }
         await user.save();
 
         return res.status(200).json({ message: 'Rental ended', rental });

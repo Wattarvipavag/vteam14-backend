@@ -1,4 +1,6 @@
 import SimulatedBike from '../simulation/bikeClass.js';
+import Rental from '../models/rentalModel.js';
+import { endRental } from '../controllers/rentalController.js';
 
 /**
  * Class for holding and managing the simulation of bikes and customers
@@ -46,7 +48,7 @@ class Simulation {
         });
     }
 
-    async startSim(rentalsAtATime = 10, delay = 3000) {
+    async startSim(rentalsAtATime = 10, delay = 3000, bikeDelay = 20000) {
         const bikeIdArray = Object.keys(this.bikes);
         const shuffled = this.shuffle(bikeIdArray);
         const customerIds = Object.keys(this.customers);
@@ -54,28 +56,108 @@ class Simulation {
         const rentalsToInsert = [];
 
         for (let i = 0; i < count; i++) {
-            const id = customerIds[i];
+            const customerId = customerIds[i];
             const bikeId = shuffled[i];
-            const startLocation = this.bikes[bikeId].location;
-            console.log(startLocation);
 
-            this.rentals[i] = { customerId: id, bikeId: bikeId };
+            //Start the individual bike simulation
+            this.startBikeSim(this.bikes[bikeId], bikeDelay);
 
+            if (!this.rentals[bikeId]) {
+                this.rentals[bikeId] = {};
+            }
+            //Add the rental to the rental dict by bike id
+            this.rentals[bikeId].customer = customerId;
+            this.rentals[bikeId].rentalId = 'id';
+
+            //Create a rental to be sent to the database
             const rental = {
-                userId: id,
+                userId: customerId,
                 bikeId: bikeId,
                 startLocation: this.bikes[bikeId].location,
             };
 
+            // Push the rental data to an array later used to insertMany
+            rentalsToInsert.push(rental);
+
             if ((i + 1) % rentalsAtATime === 0) {
                 console.log('New batch');
+
+                try {
+                    //Inserts the current batch of created rentals to the database
+                    //More efficient than inserting them one by one
+                    const rentals = await Rental.insertMany(rentalsToInsert);
+
+                    //Add each rental id to the rentals dict that is sorted by bike ids
+                    rentals.forEach((rental) => {
+                        this.rentals[rental.bikeId].rentalId = rental._id;
+                    });
+                    rentalsToInsert.length = 0;
+                } catch (e) {
+                    console.error('Error adding rentals to db', e);
+                }
+
+                //Creates a promise we wait for in order to delay the batches of rentals
                 await new Promise((resolve) => setTimeout(resolve, delay));
+            }
+        }
+
+        // After the for loop has been run, we check for remaining rentals and add them
+        if (rentalsToInsert.length > 0) {
+            try {
+                const rentals = await Rental.insertMany(rentalsToInsert);
+
+                //Add each rental id to the rentals dict that is sorted by bike ids
+                rentals.forEach((rental) => {
+                    this.rentals[rental.bikeId].rentalId = rental._id;
+                });
+                console.log('Last rentals added: ', rentalsToInsert.length);
+            } catch (e) {
+                console.error('Error adding remaining rentals to db', e);
             }
         }
     }
 
-    rentBike(bike) {
-        console.log('Bike rented', bike);
+    // Stops all bikes from further simulation
+    async stopSim() {
+        // Creates a dummy res object in order to use the endRental function in the rentalController
+        const dummyRes = {
+            status: () => {
+                return dummyRes;
+            },
+            json: () => {},
+        };
+
+        const bikeIds = Object.keys(this.rentals);
+        for (const bikeId of bikeIds) {
+            const bikeDone = this.bikes[bikeId].getRouteCompleted();
+
+            if (!bikeDone) {
+                this.bikes[bikeId].stopBike();
+            }
+
+            const location = this.bikes[bikeId].getLocation();
+
+            if (this.rentals[bikeId] && this.rentals[bikeId].rentalId) {
+                const data = {
+                    params: {
+                        id: this.rentals[bikeId].rentalId,
+                    },
+                    body: {
+                        latitude: location.latitude,
+                        longitude: location.longitude,
+                    },
+                };
+                try {
+                    await endRental(data, dummyRes);
+                } catch (e) {
+                    console.error(`Error ending rental for bike ${bikeId}: ${e.message}`);
+                }
+            }
+        }
+    }
+
+    startBikeSim(bike, bikeDelay) {
+        bike.startSimulation(bikeDelay);
     }
 
     stopBike(id) {
