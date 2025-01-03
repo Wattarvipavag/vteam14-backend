@@ -30,11 +30,11 @@ class Simulation {
         bikes.forEach((bike) => {
             if (bike.parkingAreaId) {
                 const routes = this.parkingAreas[bike.parkingAreaId].routes;
-                const route = routes[Math.floor(Math.random() * [routes.length - 1])];
+                const route = routes[Math.floor(Math.random() * routes.length)];
                 this.bikes[bike._id] = new SimulatedBike(bike, route);
             } else if (bike.chargingStationId) {
                 const routes = this.chargingStations[bike.chargingStationId].routes;
-                const route = routes[Math.floor(Math.random() * [routes.length - 1])];
+                const route = routes[Math.floor(Math.random() * routes.length)];
                 this.bikes[bike._id] = new SimulatedBike(bike, route);
             }
         });
