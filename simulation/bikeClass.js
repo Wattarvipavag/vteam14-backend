@@ -17,6 +17,7 @@ class SimulatedBike {
 
     async startSimulation(bikeDelay) {
         console.log('Simulation started for bike: ', this._id);
+        this.available = false;
 
         //Sets a random delay between 3 seconds and 33 seconds
         const delay = Math.floor(Math.random() * bikeDelay + 3000);
@@ -44,6 +45,12 @@ class SimulatedBike {
             this.charge -= 5;
             this.speed = Math.floor(Math.random() * this.bikeMaxSpeed);
             console.log('Moved bike: ', this._id, 'On step: ', this.step, 'Current speed: ', this.speed, 'Current charge: ', this.charge);
+
+            if (this.step === this.route.length) {
+                this.speed = 0;
+                this.available = true;
+                this.routeCompleted = true;
+            }
         } else {
             this.speed = 0;
             this.available = false;
@@ -56,6 +63,8 @@ class SimulatedBike {
         this.speed = 0;
         if (this.charge > 10) {
             this.available = true;
+        } else {
+            this.available = false;
         }
     }
 
@@ -65,6 +74,14 @@ class SimulatedBike {
 
     getLocation() {
         return this.location;
+    }
+
+    getCharge() {
+        return this.charge;
+    }
+
+    getAvailability() {
+        return this.available;
     }
 }
 
