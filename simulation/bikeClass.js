@@ -13,11 +13,13 @@ class SimulatedBike {
         this.qrCode = bike.qrCode;
         this.bikeMaxSpeed = 15;
         this.routeCompleted = false;
+        this.activeRental = false;
     }
 
     async startSimulation(bikeDelay) {
         console.log('Simulation started for bike: ', this._id);
         this.available = false;
+        this.activeRental = true;
 
         //Sets a random delay between 3 seconds and 33 seconds
         const delay = Math.floor(Math.random() * bikeDelay + 3000);
@@ -48,12 +50,10 @@ class SimulatedBike {
 
             if (this.step === this.route.length) {
                 this.speed = 0;
-                this.available = true;
                 this.routeCompleted = true;
             }
         } else {
             this.speed = 0;
-            this.available = false;
             this.routeCompleted = true;
         }
     }
@@ -82,6 +82,18 @@ class SimulatedBike {
 
     getAvailability() {
         return this.available;
+    }
+
+    getActiveRental() {
+        return this.activeRental;
+    }
+
+    /**
+     * Setter for activeRental
+     * @param {Boolean} bool
+     */
+    setActiveRental(bool) {
+        this.activeRental = bool;
     }
 }
 

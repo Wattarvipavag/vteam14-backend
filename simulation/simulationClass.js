@@ -1,6 +1,7 @@
 import SimulatedBike from '../simulation/bikeClass.js';
 import Rental from '../models/rentalModel.js';
 import { endRental } from '../controllers/rentalController.js';
+import mongoose from 'mongoose';
 
 /**
  * Class for holding and managing the simulation of bikes and customers
@@ -48,11 +49,11 @@ class Simulation {
         });
     }
 
-    async startSim(rentalsAtATime = 10, delay = 3000, bikeDelay = 20000) {
+    async startSim(rentalsAtATime = 50, delay = 3000, bikeDelay = 5000) {
         const bikeIdArray = Object.keys(this.bikes);
         const shuffled = this.shuffle(bikeIdArray);
         const customerIds = Object.keys(this.customers);
-        const count = customerIds.length;
+        const count = customerIds.length > bikeIdArray.length ? bikeIdArray.length : customerIds.length;
         const rentalsToInsert = [];
 
         for (let i = 0; i < count; i++) {
@@ -119,14 +120,6 @@ class Simulation {
 
     // Stops all bikes from further simulation
     async stopSim() {
-        // Creates a dummy res object in order to use the endRental function in the rentalController
-        const dummyRes = {
-            status: () => {
-                return dummyRes;
-            },
-            json: () => {},
-        };
-
         const bikeIds = Object.keys(this.rentals);
         for (const bikeId of bikeIds) {
             const bikeDone = this.bikes[bikeId].getRouteCompleted();
@@ -136,23 +129,54 @@ class Simulation {
             }
 
             const location = this.bikes[bikeId].getLocation();
+            const activeRental = this.bikes[bikeId].getActiveRental();
 
-            if (this.rentals[bikeId] && this.rentals[bikeId].rentalId) {
-                const data = {
-                    params: {
-                        id: this.rentals[bikeId].rentalId,
-                    },
-                    body: {
-                        latitude: location.latitude,
-                        longitude: location.longitude,
-                    },
-                };
+            if (this.rentals[bikeId] && this.rentals[bikeId].rentalId && activeRental) {
+                this.bikes[bikeId].setActiveRental(false);
                 try {
-                    await endRental(data, dummyRes);
+                    await this.endSimRental(bikeId, this.rentals[bikeId].rentalId, location.latitude, location.longitude);
                 } catch (e) {
                     console.error(`Error ending rental for bike ${bikeId}: ${e.message}`);
                 }
             }
+        }
+    }
+
+    //Ends the rental
+    async endSimRental(bikeId, rentalId, latitude, longitude) {
+        let simRentalId = rentalId;
+        if (typeof rentalId === 'string') {
+            simRentalId = rentalId.trim();
+            simRentalId = mongoose.Types.ObjectId.createFromHexString(simRentalId);
+        }
+        if (!mongoose.isValidObjectId(simRentalId)) {
+            console.error(`Invalid rentalId: ${simRentalId} for bike ${bikeId}`);
+            console.log('Type of rentalId:', typeof simRentalId);
+            return;
+        }
+        console.log('Type of rentalId:', typeof simRentalId);
+
+        // Creates a dummy res object in order to use the endRental function in the rentalController
+        const dummyRes = {
+            status: () => {
+                return dummyRes;
+            },
+            json: () => {},
+        };
+
+        const data = {
+            params: {
+                id: simRentalId,
+            },
+            body: {
+                latitude: latitude,
+                longitude: longitude,
+            },
+        };
+        try {
+            await endRental(data, dummyRes);
+        } catch (e) {
+            console.error(`Error ending rental for bike ${bikeId}: ${e.message}`);
         }
     }
 
@@ -164,16 +188,29 @@ class Simulation {
         console.log(id, ' Stopped');
     }
 
-    getUpdatedData() {
+    async getUpdatedData() {
         const bikeIdArray = Object.keys(this.rentals);
-        bikeIdArray.forEach((bikeId) => {
+        const updatePromises = bikeIdArray.map(async (bikeId) => {
             const location = this.bikes[bikeId].getLocation();
             const charge = this.bikes[bikeId].getCharge();
             const available = this.bikes[bikeId].getAvailability();
+
             this.rentals[bikeId].location = location;
             this.rentals[bikeId].charge = charge;
             this.rentals[bikeId].available = available;
+
+            const routeComplete = this.bikes[bikeId].getRouteCompleted();
+            const activeRental = this.bikes[bikeId].getActiveRental();
+            if (routeComplete && activeRental) {
+                this.bikes[bikeId].setActiveRental(false);
+                try {
+                    await this.endSimRental(bikeId, this.rentals[bikeId].rentalId, location.latitude, location.longitude);
+                } catch (e) {
+                    console.error(`Error ending rental for bike ${bikeId}: ${e.message}`);
+                }
+            }
         });
+        await Promise.all(updatePromises);
         return this.rentals;
     }
 
