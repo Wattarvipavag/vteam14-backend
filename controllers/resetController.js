@@ -25,9 +25,9 @@ export async function deleteAll(req, res) {
 
 export async function recreateAll(req, res) {
     try {
-        const bikesToAddToCharging = req.body.bikesToAddToCharging ?? 2;
-        const bikesToAddToParking = req.body.bikesToAddToParking ?? 5;
-        const customersToCreate = req.body.customersToCreate ?? 100;
+        const bikesToAddToCharging = req.body.bikesToAddToCharging ?? 30;
+        const bikesToAddToParking = req.body.bikesToAddToParking ?? 40;
+        const customersToCreate = req.body.customersToCreate ?? 1000;
         const cityIds = await createCities(cities);
         const [parkings, chargings, bikeDetails, customers] = await Promise.all([
             insertParkings(cityIds, bikesToAddToParking),
