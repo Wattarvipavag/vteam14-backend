@@ -86,8 +86,16 @@ export async function createRental(req, res) {
 
         await bike.save();
 
+        if (!res) {
+            return { rental: newRental };
+        }
+
         return res.status(200).json({ message: 'Rental created', rental: newRental });
     } catch (e) {
+        if (!res) {
+            return;
+        }
+
         res.status(500).json({ message: e.message });
     }
 }
@@ -96,6 +104,7 @@ export async function endRental(req, res) {
     try {
         const rentalId = req.params.id;
         const endLocation = { latitude: req.body.latitude, longitude: req.body.longitude };
+        const charge = req.body.charge;
 
         const rental = await Rental.findById(rentalId);
 
@@ -130,7 +139,12 @@ export async function endRental(req, res) {
         rental.endLocation = endLocation;
         await rental.save();
 
-        bike.available = true;
+        if (charge >= 10) {
+            bike.available = true;
+        } else {
+            bike.available = false;
+        }
+        bike.charge = charge;
         bike.location = endLocation;
         await bike.save();
 
