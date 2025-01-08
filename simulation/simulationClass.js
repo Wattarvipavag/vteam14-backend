@@ -1,6 +1,6 @@
 import SimulatedBike from '../simulation/bikeClass.js';
 import Rental from '../models/rentalModel.js';
-import { endRental } from '../controllers/rentalController.js';
+import { endRental, createRental } from '../controllers/rentalController.js';
 import mongoose from 'mongoose';
 
 /**
@@ -49,71 +49,68 @@ class Simulation {
         });
     }
 
-    async startSim(rentalsAtATime = 50, delay = 3000, bikeDelay = 5000) {
+    async startSim(rentalsAtATime = 20, delay = 1000, bikeDelay = 5000) {
         const bikeIdArray = Object.keys(this.bikes);
         const shuffled = this.shuffle(bikeIdArray);
         const customerIds = Object.keys(this.customers);
-        const count = customerIds.length > bikeIdArray.length ? bikeIdArray.length : customerIds.length;
-        const rentalsToInsert = [];
+        const count = Math.min(customerIds.length, bikeIdArray.length);
+        const rentalPromises = [];
 
         for (let i = 0; i < count; i++) {
             const customerId = customerIds[i];
             const bikeId = shuffled[i];
 
-            //Start the individual bike simulation
+            // Start bike simulation
             this.startBikeSim(this.bikes[bikeId], bikeDelay);
 
             if (!this.rentals[bikeId]) {
                 this.rentals[bikeId] = {};
             }
-            //Add the rental to the rental dict by bike id
             this.rentals[bikeId].customer = customerId;
-            this.rentals[bikeId].rentalId = 'id';
 
-            //Create a rental to be sent to the database
-            const rental = {
-                userId: customerId,
-                bikeId: bikeId,
-                startLocation: this.bikes[bikeId].location,
+            // Prepare rental request
+            const req = {
+                body: {
+                    userId: customerId,
+                    bikeId: bikeId,
+                },
             };
 
-            // Push the rental data to an array later used to insertMany
-            rentalsToInsert.push(rental);
+            rentalPromises.push(req);
 
+            // Batch processing
             if ((i + 1) % rentalsAtATime === 0) {
-                console.log('New batch');
-
-                try {
-                    //Inserts the current batch of created rentals to the database
-                    //More efficient than inserting them one by one
-                    const rentals = await Rental.insertMany(rentalsToInsert);
-
-                    //Add each rental id to the rentals dict that is sorted by bike ids
-                    rentals.forEach((rental) => {
-                        this.rentals[rental.bikeId].rentalId = rental._id;
-                    });
-                    rentalsToInsert.length = 0;
-                } catch (e) {
-                    console.error('Error adding rentals to db', e);
+                console.log('Processing batch...');
+                for (const request of rentalPromises) {
+                    try {
+                        const rentalResponse = await createRental(request);
+                        if (!rentalResponse || !rentalResponse.rental) {
+                            console.error(`Failed to create rental for bike ${request.body.bikeId}`);
+                            continue;
+                        }
+                        this.rentals[request.body.bikeId].rentalId = rentalResponse.rental._id;
+                    } catch (error) {
+                        console.error(`Error processing rental: ${error.message}`);
+                    }
                 }
-
-                //Creates a promise we wait for in order to delay the batches of rentals
+                rentalPromises.length = 0;
                 await new Promise((resolve) => setTimeout(resolve, delay));
             }
         }
 
-        // After the for loop has been run, we check for remaining rentals and add them
-        if (rentalsToInsert.length > 0) {
-            try {
-                const rentals = await Rental.insertMany(rentalsToInsert);
-
-                //Add each rental id to the rentals dict that is sorted by bike ids
-                rentals.forEach((rental) => {
-                    this.rentals[rental.bikeId].rentalId = rental._id;
-                });
-                console.log('Last rentals added: ', rentalsToInsert.length);
-            } catch (e) {
-                console.error('Error adding remaining rentals to db', e);
+        // Final batch processing (for remaining rentals)
+        if (rentalPromises.length > 0) {
+            for (const request of rentalPromises) {
+                try {
+                    const rentalResponse = await createRental(request);
+                    if (!rentalResponse || !rentalResponse.rental) {
+                        console.error(`Failed to create rental for bike ${request.body.bikeId}`);
+                        continue;
+                    }
+                    this.rentals[request.body.bikeId].rentalId = rentalResponse.rental._id;
+                } catch (error) {
+                    console.error(`Error processing final rentals: ${error.message}`);
+                }
             }
         }
     }
@@ -130,11 +127,12 @@ class Simulation {
 
             const location = this.bikes[bikeId].getLocation();
             const activeRental = this.bikes[bikeId].getActiveRental();
+            const charge = this.bikes[bikeId].getCharge();
 
             if (this.rentals[bikeId] && this.rentals[bikeId].rentalId && activeRental) {
                 this.bikes[bikeId].setActiveRental(false);
                 try {
-                    await this.endSimRental(bikeId, this.rentals[bikeId].rentalId, location.latitude, location.longitude);
+                    await this.endSimRental(bikeId, this.rentals[bikeId].rentalId, location.latitude, location.longitude, charge);
                 } catch (e) {
                     console.error(`Error ending rental for bike ${bikeId}: ${e.message}`);
                 }
@@ -143,18 +141,17 @@ class Simulation {
     }
 
     //Ends the rental
-    async endSimRental(bikeId, rentalId, latitude, longitude) {
+    async endSimRental(bikeId, rentalId, latitude, longitude, charge) {
         let simRentalId = rentalId;
         if (typeof rentalId === 'string') {
             simRentalId = rentalId.trim();
             simRentalId = mongoose.Types.ObjectId.createFromHexString(simRentalId);
         }
+
         if (!mongoose.isValidObjectId(simRentalId)) {
             console.error(`Invalid rentalId: ${simRentalId} for bike ${bikeId}`);
-            console.log('Type of rentalId:', typeof simRentalId);
             return;
         }
-        console.log('Type of rentalId:', typeof simRentalId);
 
         // Creates a dummy res object in order to use the endRental function in the rentalController
         const dummyRes = {
@@ -171,6 +168,7 @@ class Simulation {
             body: {
                 latitude: latitude,
                 longitude: longitude,
+                charge: charge,
             },
         };
         try {
@@ -201,10 +199,10 @@ class Simulation {
 
             const routeComplete = this.bikes[bikeId].getRouteCompleted();
             const activeRental = this.bikes[bikeId].getActiveRental();
-            if (routeComplete && activeRental) {
+            if (routeComplete && activeRental && this.rentals[bikeId].rentalId) {
                 this.bikes[bikeId].setActiveRental(false);
                 try {
-                    await this.endSimRental(bikeId, this.rentals[bikeId].rentalId, location.latitude, location.longitude);
+                    await this.endSimRental(bikeId, this.rentals[bikeId].rentalId, location.latitude, location.longitude, charge);
                 } catch (e) {
                     console.error(`Error ending rental for bike ${bikeId}: ${e.message}`);
                 }
