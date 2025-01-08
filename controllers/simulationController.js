@@ -58,7 +58,7 @@ export async function endSimulation(req, res) {
     return res.status(404).json({ message: 'No simulation to stop' });
 }
 
-export async function stopBike(req, res) {
+export async function stopBike(req) {
     const id = req.params.id;
     simulation.stopBike(id);
     console.log('Bike stopped: ', id);
