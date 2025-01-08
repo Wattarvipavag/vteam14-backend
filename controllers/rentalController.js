@@ -111,14 +111,10 @@ export async function endRental(req, res) {
         const bike = await Bike.findById(rental.bikeId);
         const city = await City.findOne({ bikes: rental.bikeId }).populate('parkingAreas').populate('chargingStations');
 
-        let isInParkingArea = false;
-        let isInChargingStation = false;
-
         for (const area of city.parkingAreas) {
             if (isWithinArea(endLocation, area.location)) {
                 area.bikes.push(bike._id);
                 await area.save();
-                isInParkingArea = true;
                 bike.parkingAreaId = area._id;
 
                 break;
@@ -129,7 +125,6 @@ export async function endRental(req, res) {
             if (isWithinArea(endLocation, station.location)) {
                 station.bikes.push(bike._id);
                 await station.save();
-                isInChargingStation = true;
                 bike.chargingStationId = station._id;
                 break;
             }

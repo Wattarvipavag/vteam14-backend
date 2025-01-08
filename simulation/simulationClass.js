@@ -1,5 +1,4 @@
 import SimulatedBike from '../simulation/bikeClass.js';
-import Rental from '../models/rentalModel.js';
 import { endRental, createRental } from '../controllers/rentalController.js';
 import mongoose from 'mongoose';
 

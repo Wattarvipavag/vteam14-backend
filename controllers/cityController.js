@@ -54,14 +54,6 @@ export async function createCity(req, res) {
     }
 }
 
-export async function updateCity(req, res) {
-    try {
-        const placeHolder = '';
-    } catch (e) {
-        res.status(500).json({ message: e.message });
-    }
-}
-
 export async function deleteCityById(req, res) {
     try {
         const cityId = req.params.id;
