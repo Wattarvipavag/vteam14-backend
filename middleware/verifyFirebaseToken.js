@@ -8,6 +8,7 @@ export const verifyToken = async (req, res, next) => {
         await firebaseApp.auth().verifyIdToken(token);
         next();
     } catch (error) {
+        console.log(error);
         res.status(401).json({ message: 'Invalid token' });
     }
 };

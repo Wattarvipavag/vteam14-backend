@@ -23,16 +23,29 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api', authRoutes);
-app.use('/api/users', verifyToken, userRoutes);
-app.use('/api/cities', verifyToken, cityRoutes);
-app.use('/api/bikes', verifyToken, bikeRoutes);
-app.use('/api/chargingstations', verifyToken, chargingStationRoutes);
-app.use('/api/parkingareas', verifyToken, parkingAreaRoutes);
-app.use('/api/stats', verifyToken, statsRoutes);
-app.use('/api/rentals', verifyToken, rentalRoutes);
-app.use('/api/reset', verifyToken, resetRoutes);
-app.use('/api/simulation', verifyToken, simulationRoutes);
+if (process.env.NODE_ENV === 'test') {
+    app.use('/api', authRoutes);
+    app.use('/api/users', userRoutes);
+    app.use('/api/cities', cityRoutes);
+    app.use('/api/bikes', bikeRoutes);
+    app.use('/api/chargingstations', chargingStationRoutes);
+    app.use('/api/parkingareas', parkingAreaRoutes);
+    app.use('/api/stats', statsRoutes);
+    app.use('/api/rentals', rentalRoutes);
+    app.use('/api/reset', resetRoutes);
+    app.use('/api/simulation', simulationRoutes);
+} else {
+    app.use('/api', authRoutes);
+    app.use('/api/users', verifyToken, userRoutes);
+    app.use('/api/cities', verifyToken, cityRoutes);
+    app.use('/api/bikes', verifyToken, bikeRoutes);
+    app.use('/api/chargingstations', verifyToken, chargingStationRoutes);
+    app.use('/api/parkingareas', verifyToken, parkingAreaRoutes);
+    app.use('/api/stats', verifyToken, statsRoutes);
+    app.use('/api/rentals', verifyToken, rentalRoutes);
+    app.use('/api/reset', verifyToken, resetRoutes);
+    app.use('/api/simulation', verifyToken, simulationRoutes);
+}
 
 export { app };
 
