@@ -3,7 +3,6 @@ import { app } from '../../index.js';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import User from '../../models/userModel.js';
-
 let mongoServer;
 
 beforeAll(async () => {
