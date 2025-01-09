@@ -25,5 +25,7 @@ jobs:
               with:
                   node-version: ${{ matrix.node-version }}
                   cache: 'npm'
+            - name: Set environment variable PRIVATE_KEY
+              run: echo "PRIVATE_KEY=${{ secrets.PRIVATE_KEY }}" >> $GITHUB_ENV
             - run: npm install
             - run: npm run test
