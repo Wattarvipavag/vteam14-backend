@@ -1,8 +1,11 @@
 import { keys } from './serviceAccountKey.js';
 import admin from 'firebase-admin';
 
-const firebaseApp = admin.initializeApp({
-    credential: admin.credential.cert(keys),
-});
+let firebaseApp;
 
+if (process.env.NODE_ENV !== 'test') {
+    firebaseApp = admin.initializeApp({
+        credential: admin.credential.cert(keys),
+    });
+}
 export default firebaseApp;
