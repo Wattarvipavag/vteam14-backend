@@ -3,7 +3,6 @@ import { app } from '../../index.js';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import City from '../../models/cityModel.js';
-import 'dotenv/config';
 let mongoServer;
 
 beforeAll(async () => {
