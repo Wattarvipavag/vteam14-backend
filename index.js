@@ -12,9 +12,10 @@ import statsRoutes from './routes/statsRoute.js';
 import rentalRoutes from './routes/rentalRoute.js';
 import resetRoutes from './routes/resetRoute.js';
 import simulationRoutes from './routes/simulationRoute.js';
+import { verifyToken } from './middleware/verifyFirebaseToken.js';
 
 const app = express();
-const PORT = process.env.PORT || 8000; // Default port is 8000 if not defined
+const PORT = process.env.PORT || 8000;
 
 const MONGOURI = process.env.MONGOURI_PROD;
 
@@ -23,24 +24,22 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/cities', cityRoutes);
-app.use('/api/bikes', bikeRoutes);
-app.use('/api/chargingstations', chargingStationRoutes);
-app.use('/api/parkingareas', parkingAreaRoutes);
-app.use('/api/stats', statsRoutes);
-app.use('/api/rentals', rentalRoutes);
-app.use('/api/reset', resetRoutes);
-app.use('/api/simulation', simulationRoutes);
+app.use('/api/users', verifyToken, userRoutes);
+app.use('/api/cities', verifyToken, cityRoutes);
+app.use('/api/bikes', verifyToken, bikeRoutes);
+app.use('/api/chargingstations', verifyToken, chargingStationRoutes);
+app.use('/api/parkingareas', verifyToken, parkingAreaRoutes);
+app.use('/api/stats', verifyToken, statsRoutes);
+app.use('/api/rentals', verifyToken, rentalRoutes);
+app.use('/api/reset', verifyToken, resetRoutes);
+app.use('/api/simulation', verifyToken, simulationRoutes);
 
-// Export app for testing
 export { app };
 
-// Only start the server if not in a test environment
 if (process.env.NODE_ENV !== 'test') {
     async function startServer() {
         try {
-            await connectToDb(MONGOURI); // Use appropriate Mongo URI for the environment
+            await connectToDb(MONGOURI);
 
             app.listen(PORT, () => {
                 console.log(`App running on port ${PORT}`);
