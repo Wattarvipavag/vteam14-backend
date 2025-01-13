@@ -7,6 +7,7 @@ import Rental from '../models/rentalModel.js';
 import { cities, getParkingAreas, getChargingStations, getBikeDetails } from '../db/repopulateDbConfig.js';
 import QRCode from 'qrcode';
 
+// Function that deletes all bikes, parking areas, charging stations, cities, rentals and customers. Admins will not be deleted.
 export async function deleteAll(req, res) {
     try {
         await Promise.all([
@@ -23,6 +24,9 @@ export async function deleteAll(req, res) {
     }
 }
 
+// Function that repopulates the database with help of static code in repopulateDbConfig.js
+// Can be sent a request from the fronend with values for how many bikes/customers to add
+// If no request is made and the function is called there are some default values set.
 export async function recreateAll(req, res) {
     try {
         const bikesToAddToCharging = req.body.bikesToAddToCharging ?? 30;
@@ -67,6 +71,15 @@ async function createCities(cities) {
     return insertedIds;
 }
 
+/**
+ * Function that generates parking area objects based on current cityIds, with static code from repopulateDbConfig.js
+ * It adds these parking areas to the database, updates each city with the created parking areas and calls the addBikes function
+ * to insert the provided number of bikes to each parking area in each city.
+ *
+ * @param {Array} cityIds, an array of mongoose city id's
+ * @param {Number} numBikesToAddToEach, number of bikes to add to each parking area
+ * @returns {Object} an object with number of parking areas, the parking area ids, total num bikes added
+ */
 async function insertParkings(cityIds, numBikesToAddToEach) {
     const parkingAreas = getParkingAreas(cityIds);
     try {
@@ -104,6 +117,15 @@ async function insertParkings(cityIds, numBikesToAddToEach) {
     }
 }
 
+/**
+ * Function that generates charging station objects based on current cityIds, with static code from repopulateDbConfig.js
+ * It adds these charging stations to the database, updates each city with the created charging stations and calls the addBikes function
+ * to insert the provided number of bikes to each charging station in each city.
+ *
+ * @param {Array} cityIds, an array of mongoose city id's
+ * @param {Number} numBikesToAddToEach, number of bikes to add to each charging station
+ * @returns {Object} an object with number of charging stations, the charging station ids, total num bikes added
+ */
 async function insertChargingstations(cityIds, numBikesToAddToEach) {
     const chargingStations = getChargingStations(cityIds);
     try {
@@ -309,6 +331,12 @@ async function addBikes(data = [], toWhat = '', numberOfBikes = 0, id = '') {
     }
 }
 
+/**
+ * Function that creates an amount of bot customers for testing and simulation purposes which it populates the database with.
+ *
+ * @param {Number} numberOfCustomersToCreate  how many bot customers we want to populate the database with (between 1 and 1000 currently).
+ * @returns {Object} database response, object of the created customers
+ */
 async function createCustomers(numberOfCustomersToCreate) {
     if (typeof numberOfCustomersToCreate !== 'number' || numberOfCustomersToCreate < 1 || numberOfCustomersToCreate > 1000) {
         throw new Error(
