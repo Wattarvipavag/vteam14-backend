@@ -9,7 +9,7 @@ export const cities = [
  * Function that returns bike objects to be added to the database.
  * @param {Array} cityIds- array of the id's which we use to set each cityId with
  * @param {Array} bikes- array of bike objects which we use to set the dynamic values of each bike
- * @return {Array} returns an array of bike objects ready to be sent to the database.
+ * @return {Array} returns an array of bike objects ready to be sent to the database or simulation.
  *
  */
 export function getBikeDetails(cityIds, bikes = []) {
@@ -217,8 +217,9 @@ export function getBikeDetails(cityIds, bikes = []) {
 }
 
 /**
- * Function that returns objects needed to create parking areas in the database
- * @param {Array} cityIds- the id's which we use to set each parkings cityId to based on index. So order is important!
+ * Function that returns objects needed to create parking areas in the database or simulation
+ * @param {Array} cityIds- the id's which we use to set each parking areas cityId to based on index. So order is important!
+ * @param {Array} parkingAreaIds- mongoose id's to insert into each parkingArea object
  * @return {Array} returns an array of parking area objects
  *
  */
@@ -473,8 +474,9 @@ export function getParkingAreas(cityIds, parkingAreaIds = []) {
 }
 
 /**
- * Function that returns objects needed to create charging stations in the database
+ * Function that returns objects needed to create charging stations in the database or simulation
  * @param {Array} cityIds- the id's which we use to set each charging stations cityId to based on index. So order is important!
+ * @param {Array} chargingStationIds- mongoose id's to insert into each chargingstation object under each city
  * @return {Array} returns an array of charging station objects
  *
  */
