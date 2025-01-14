@@ -1,3 +1,9 @@
+/**
+ * Class for simulating a bike
+ *
+ * @param {Object} bike The bike object to simulate, containing properties such as ID, location, qrCode and charge.
+ * @param {Array<{latitude: number, longitude: number}>} route An array of waypoint objects, each containing latitude and longitude coordinates.
+ */
 class SimulatedBike {
     constructor(bike, route) {
         this._id = bike._id;
@@ -16,6 +22,12 @@ class SimulatedBike {
         this.activeRental = false;
     }
 
+    /**
+     * Starts the bike simulation by moving it through its defined route with delays between waypoints.
+     *
+     * @param {number} bikeDelay The maximum additional delay in milliseconds added between each waypoint.
+     * A random delay between 3000 and (3000 + bikeDelay) milliseconds is used.
+     */
     async startSimulation(bikeDelay) {
         console.log('Simulation started for bike: ', this._id);
         this.available = false;
@@ -40,6 +52,11 @@ class SimulatedBike {
         console.log('Last step taken: ', this._id, 'current step: ', this.step);
     }
 
+    /**
+     * Moves the bike to its next waypoint, increases its steps taken, reduces its charge, randomizes speed
+     * checks if the bike has enough charge to continue and if its at the end of its route.
+     * If the charge is too low or if its at the end of the route then the speed is set to 0 and the routeCompleted is set to true
+     */
     moveToNextWayPoint() {
         if (this.charge > 10) {
             this.location = this.route[this.step];
@@ -58,6 +75,10 @@ class SimulatedBike {
         }
     }
 
+    /**
+     * Stops the bike by setting its route to being completed and setting its speed to 0.
+     * Also checks if it has a charge above 10, if it does the bike is available for further rentals
+     */
     stopBike() {
         this.routeCompleted = true;
         this.speed = 0;

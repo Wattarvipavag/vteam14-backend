@@ -48,6 +48,13 @@ class Simulation {
         });
     }
 
+    /**
+     * Method that starts the simulation and rents out available bikes in a staggered fashion in order to
+     * decrease the load on the database
+     * @param {Number} rentalsAtATime number of rentals to send to the database for each batch
+     * @param {Number} delay the delay between batch requests to the database
+     * @param {Number} bikeDelay the baseline delay each bike will have between moving to the next waypoint on its route
+     */
     async startSim(rentalsAtATime = 20, delay = 1000, bikeDelay = 5000) {
         const bikeIdArray = Object.keys(this.bikes);
         const shuffled = this.shuffle(bikeIdArray);
@@ -114,7 +121,10 @@ class Simulation {
         }
     }
 
-    // Stops all bikes from further simulation
+    /**
+     * Stops the simulation by looping over all rented bikes and stopping those
+     * that have not stopped on their own by finishing their route or running out of charge
+     */
     async stopSim() {
         const bikeIds = Object.keys(this.rentals);
         for (const bikeId of bikeIds) {
@@ -139,7 +149,16 @@ class Simulation {
         }
     }
 
-    //Ends the rental
+    /**
+     * Method that ends the rental for the provided bike with details. utilizes the rentalController.js
+     * to end the rental in the database
+     * @param {mongoose.Types.ObjectId} bikeId mongoose id for the bike
+     * @param {mongoose.Types.ObjectId} rentalId mongoose id for the rental
+     * @param {Number} latitude the floating point value for the bikes latitude
+     * @param {Number} longitude the floating point value for the bikes longitude
+     * @param {Number} charge the current charge of the bike, number signifies percentage
+     * @returns
+     */
     async endSimRental(bikeId, rentalId, latitude, longitude, charge) {
         let simRentalId = rentalId;
         if (typeof rentalId === 'string') {
@@ -177,6 +196,11 @@ class Simulation {
         }
     }
 
+    /**
+     * Method that starts up a bikeClass internal simulation
+     * @param {SimulatedBike} bike one instance of a SimulatedBike class
+     * @param {Number} bikeDelay the delay in milliseconds the bike will use between waypoints
+     */
     startBikeSim(bike, bikeDelay) {
         bike.startSimulation(bikeDelay);
     }
@@ -185,6 +209,11 @@ class Simulation {
         console.log(id, ' Stopped');
     }
 
+    /**
+     * Method that updates and returns the object holding all the rentals
+     * @returns an updated object signifying the state of all current rentals
+     * containing the data needed for the frontend to update the map
+     */
     async getUpdatedData() {
         const bikeIdArray = Object.keys(this.rentals);
         const updatePromises = bikeIdArray.map(async (bikeId) => {
